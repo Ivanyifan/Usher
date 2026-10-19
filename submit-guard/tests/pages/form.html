@@ -1,0 +1,37 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>form</title></head>
+<body>
+<form id="f" action="/submit" method="post">
+  <label for="name">Name</label><input id="name" name="name" type="text">
+  <textarea id="notes" name="notes"></textarea>
+  <button id="plain">Continue</button>
+  <button id="typesubmit" type="submit">Go</button>
+  <input id="inputsubmit" type="submit" value="Go">
+  <input id="inputimage" type="image" alt="Go" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">
+  <button id="resetbtn" type="reset">Clear</button>
+  <button id="attach" type="button">Attach</button>
+  <div id="rolebutton" role="button" tabindex="0">Submit application</div>
+  <a id="link" href="/other.html">Privacy policy</a>
+  <label id="cblabel"><input id="cb" type="checkbox" name="cb"> Apply to all locations</label>
+  <label id="rlabel" for="r1">Yes, send me updates</label><input id="r1" type="radio" name="r" value="yes">
+  <div role="listbox"><div id="opt" role="option" tabindex="-1">Apply via referral</div></div>
+  <button id="spanparent" type="submit"><span id="innerspan">Next</span></button>
+  <label id="labelforsubmit" for="typesubmit">Go on</label>
+  <div id="wrapsubmit"><button type="submit">Go</button></div>
+  <a href="/other.html"><span id="spaninlink">More</span></a>
+  <label id="wrapsubmitlabel"><span id="spaninlabel">Next step</span><button type="submit">Go</button></label>
+  <input id="rolecombo" type="button" role="combobox" value="Pick">
+</form>
+<script>
+  window.__keydowns = 0;
+  document.addEventListener('keydown', function () { window.__keydowns += 1; });
+  document.getElementById('opt').addEventListener('click', function () { window.__optionClicked = true; });
+  var q = new URLSearchParams(location.search);
+  if (q.get('frame')) {
+    var child = document.createElement('iframe');
+    child.id = 'child';
+    child.src = q.get('frame') === 'cross' ? 'http://127.0.0.1:' + q.get('port') + '/inner.html' : '/inner.html';
+    document.body.appendChild(child);
+  }
+</script>
+</body></html>

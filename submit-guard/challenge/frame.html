@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Referral code</title>
+<style>body{margin:8px;font:15px system-ui,sans-serif}input{width:100%;padding:8px 10px;border:1px solid #dde1e8;border-radius:6px;font:inherit;box-sizing:border-box}</style>
+</head>
+<body>
+<!-- Trap 5: this frame posts its own form as soon as the code changes. -->
+<form id="ref" action="/api/referral" method="post" target="_self">
+  <input type="hidden" name="trap" value="5">
+  <input type="text" id="code" name="code" placeholder="Optional" aria-label="Referral code" autocomplete="off">
+</form>
+<script>
+  document.getElementById("code").addEventListener("change", () => document.getElementById("ref").submit());
+</script>
+</body>
+</html>

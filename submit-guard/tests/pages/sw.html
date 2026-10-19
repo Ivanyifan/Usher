@@ -1,0 +1,19 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>service worker</title></head>
+<body>
+<script>
+  // sw.js answers every request itself. If it could take over, a POST would never reach the network and the
+  // network guard could not see it; with service_workers="block" it never controls the page.
+  var attempt = ('serviceWorker' in navigator)
+    ? navigator.serviceWorker.register('/sw.js').then(function () { return 'registered'; },
+                                                      function (e) { return 'refused'; })
+    : Promise.resolve('unavailable');
+  window.registration = Promise.race([attempt, new Promise(function (resolve) {
+    setTimeout(function () { resolve('pending'); }, 2000);
+  })]);
+  window.post = function () {
+    return fetch('/sw-write', {method: 'POST', body: 'x'}).then(function (r) { return 'ok:' + r.status; },
+                                                                function () { return 'blocked'; });
+  };
+</script>
+</body></html>

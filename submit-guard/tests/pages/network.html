@@ -1,0 +1,35 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>network</title></head>
+<body>
+<p>Write requests the tests trigger through page.evaluate.</p>
+<script>
+  function result(promise) {
+    return promise.then(function (r) { return 'ok:' + r.status; }, function () { return 'blocked'; });
+  }
+  window.writes = {
+    method: function (m) { return result(fetch('/api/thing', {method: m, body: m === 'DELETE' ? null : 'x'})); },
+    get: function () { return result(fetch('/network.html')); },
+    path: function (p) { return result(fetch(p, {method: 'POST', body: 'x'})); },
+    graphqlJson: function (op) {
+      var body = op ? {operationName: op, query: 'query', variables: {value: 'not read'}} : {query: 'query'};
+      return result(fetch('/api/public-graphql', {method: 'POST', headers: {'Content-Type': 'application/json'},
+                                                    body: JSON.stringify(body)}));
+    },
+    graphqlMultipart: function (op) {
+      var form = new FormData();
+      form.append('operations', JSON.stringify({operationName: op, variables: {file: null}}));
+      form.append('map', '{"0": ["variables.file"]}');
+      form.append('0', new Blob(['%PDF-1.4 fixture'], {type: 'application/pdf'}), 'fixture.pdf');
+      return result(fetch('/api/graphql', {method: 'POST', body: form}));
+    },
+    beacon: function () { return navigator.sendBeacon('/beacon', 'x'); },
+    popup: function () { window.open('/popup.html', '_blank'); return 'opened'; },
+    iframe: function () {
+      var frame = document.createElement('iframe');
+      frame.src = '/frame_post.html';
+      document.body.appendChild(frame);
+      return 'added';
+    },
+  };
+</script>
+</body></html>

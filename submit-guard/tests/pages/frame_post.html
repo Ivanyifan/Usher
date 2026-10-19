@@ -1,0 +1,8 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>frame post</title></head>
+<body>
+<script>
+  window.done = fetch('/frame-write', {method: 'POST', body: 'x'}).then(function () { return 'ok'; },
+                                                                       function () { return 'blocked'; });
+</script>
+</body></html>

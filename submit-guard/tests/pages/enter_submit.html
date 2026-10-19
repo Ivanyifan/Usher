@@ -1,0 +1,25 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>enter submits</title></head>
+<body>
+<!-- A react-select-like dropdown inside a form. As in react-select, Enter selects the highlighted option and
+     prevents the default; with the menu open and no option highlighted it does nothing, so the browser's
+     implicit submission of the form goes ahead. -->
+<form id="f" action="/enter-submit" method="post">
+  <label id="combo-label" for="combo">Country</label>
+  <div class="select__control">
+    <input id="combo" role="combobox" aria-autocomplete="list" aria-haspopup="true" aria-expanded="true"
+           aria-labelledby="combo-label" type="text">
+  </div>
+  <div class="select__menu" role="listbox">
+    <div class="select__option" role="option">One</div>
+    <div class="select__option" role="option">Two</div>
+  </div>
+  <button type="submit">Submit application</button>
+</form>
+<script>
+  var highlighted = null;
+  document.getElementById('combo').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && highlighted !== null) { e.preventDefault(); }
+  });
+</script>
+</body></html>

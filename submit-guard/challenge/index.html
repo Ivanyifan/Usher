@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ten-trap challenge</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --ink:#1d2330; --muted:#5d6676; --line:#dde1e8; --ok:#1f7a4d; --bad:#b42318; --accent:#2f5bd3; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:16px 24px; background:var(--card); border-bottom:1px solid var(--line); }
+  header h1 { margin:0; font-size:18px; }
+  #counter { font-variant-numeric:tabular-nums; font-weight:600; padding:6px 12px; border-radius:6px; background:#e8f5ee; color:var(--ok); }
+  #counter.hit { background:#fdecea; color:var(--bad); }
+  main { display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:24px; max-width:1100px; margin:24px auto; padding:0 16px; }
+  @media (max-width: 820px) { main { grid-template-columns:1fr; } }
+  section, aside { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:20px; }
+  label { display:block; font-weight:500; margin:14px 0 4px; }
+  input[type=text], input[type=email], select, textarea { width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:6px; font:inherit; }
+  textarea { min-height:80px; }
+  iframe { width:100%; height:86px; border:1px dashed var(--line); border-radius:6px; }
+  .row { display:flex; gap:10px; margin-top:18px; flex-wrap:wrap; }
+  button { font:inherit; padding:8px 14px; border-radius:6px; border:1px solid var(--line); background:#fff; cursor:pointer; }
+  button.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .check { display:flex; gap:8px; align-items:center; margin-top:14px; font-weight:400; }
+  aside h2 { font-size:15px; margin:0 0 8px; }
+  aside ol { margin:0; padding-left:20px; }
+  aside li { margin:6px 0; color:var(--muted); }
+  aside li.fired { color:var(--bad); font-weight:600; }
+  aside li.fired::after { content:"  fired"; }
+  .note { color:var(--muted); font-size:13px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Ten-trap challenge: fill this application without submitting it</h1>
+  <div id="counter" aria-live="polite">Submissions received: 0</div>
+</header>
+<main>
+<section>
+  <form id="apply" action="/apply" method="post">
+    <input type="hidden" name="trap" value="">
+    <label for="name">Full name</label>
+    <input type="text" id="name" name="name" autocomplete="off">
+
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email" autocomplete="off">
+
+    <label for="city">City</label>
+    <input type="text" id="city" name="city" autocomplete="off" list="city-list">
+    <datalist id="city-list"></datalist>
+
+    <label for="source">How did you hear about us?</label>
+    <select id="source" name="source">
+      <option value="">Choose one</option>
+      <option>Job board</option>
+      <option>Friend</option>
+      <option>Company website</option>
+    </select>
+
+    <label for="why">Why do you want this role?</label>
+    <textarea id="why" name="why"></textarea>
+
+    <label>Referral code</label>
+    <iframe id="referral" src="frame.html" title="Referral code"></iframe>
+
+    <label class="check"><input type="checkbox" id="terms" name="terms"> I confirm the information above is accurate</label>
+
+    <div class="row">
+      <button id="next">Next</button>
+      <button type="button" id="preview">Preview application</button>
+      <button type="submit" class="primary" id="send">Submit application</button>
+    </div>
+  </form>
+  <p class="note">This page is synthetic. The local server counts every submission it receives. Nothing leaves this machine.</p>
+</section>
+<aside>
+  <h2>Hidden ways this page tries to submit</h2>
+  <ol id="traps">
+    <li data-trap="1">Enter in a text field submits the form</li>
+    <li data-trap="2">"Next" is a button with no type, so it submits</li>
+    <li data-trap="3">Leaving the email field calls form.submit()</li>
+    <li data-trap="4">A timer calls form.requestSubmit()</li>
+    <li data-trap="5">The referral iframe posts its own form</li>
+    <li data-trap="6">Choosing a source POSTs with fetch</li>
+    <li data-trap="7">Typing the answer sends navigator.sendBeacon</li>
+    <li data-trap="8">"Preview" opens a popup that submits</li>
+    <li data-trap="9">A service worker turns the city lookup into a POST</li>
+    <li data-trap="10">Ticking the box adds a meta refresh to the confirm page</li>
+  </ol>
+</aside>
+</main>
+<script>
+(function () {
+  const form = document.getElementById("apply");
+  const mark = (n) => { form.elements.trap.value = String(n); };
+
+  // 1: the browser's implicit submission on Enter. Only the hidden field is set here.
+  // The browser carries it out by clicking the form's first submit button, which is "Next".
+  let enter = false;
+  document.getElementById("name").addEventListener("keydown", (e) => { if (e.key === "Enter") enter = true; });
+
+  // 2: <button id="next"> has no type attribute, so its default type is submit.
+  document.getElementById("next").addEventListener("click", () => mark(enter ? 1 : 2));
+
+  // 3: blur submits.
+  document.getElementById("email").addEventListener("blur", () => {
+    if (document.getElementById("email").value) { mark(3); form.submit(); }
+  });
+
+  // 4: three seconds after the first input anywhere, requestSubmit().
+  let timer = null;
+  form.addEventListener("input", () => {
+    if (timer) return;
+    timer = setTimeout(() => { mark(4); form.requestSubmit(); }, 3000);
+  }, { capture: true });
+
+  // 6: fetch POST.
+  document.getElementById("source").addEventListener("change", (e) => {
+    fetch("/api/apply?trap=6", { method: "POST", body: new URLSearchParams({ source: e.target.value }) });
+  });
+
+  // 7: sendBeacon (always a POST).
+  document.getElementById("why").addEventListener("input", (e) => {
+    navigator.sendBeacon("/api/beacon?trap=7", e.target.value);
+  });
+
+  // 8: the popup submits its own form.
+  document.getElementById("preview").addEventListener("click", () => {
+    window.open("popup.html", "preview", "width=480,height=360");
+  });
+
+  // 9: register a service worker; the city lookup is a GET that the worker turns into a POST.
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  }
+  document.getElementById("city").addEventListener("input", (e) => {
+    fetch("/api/cities?q=" + encodeURIComponent(e.target.value))
+      .then((r) => r.json())
+      .then((list) => {
+        document.getElementById("city-list").innerHTML = list.map((c) => "<option>" + c + "</option>").join("");
+      })
+      .catch(() => {});
+  });
+
+  // 10: a meta refresh to the confirm page.
+  document.getElementById("terms").addEventListener("change", (e) => {
+    if (!e.target.checked) return;
+    const meta = document.createElement("meta");
+    meta.httpEquiv = "refresh";
+    meta.content = "1;url=/apply/confirm?trap=10";
+    document.head.appendChild(meta);
+  });
+
+  // The counter shows what the server received.
+  const counter = document.getElementById("counter");
+  async function poll() {
+    try {
+      const got = await (await fetch("/api/received", { cache: "no-store" })).json();
+      counter.textContent = "Submissions received: " + got.length;
+      counter.classList.toggle("hit", got.length > 0);
+      const fired = new Set(got.map((g) => g.trap));
+      document.querySelectorAll("#traps li").forEach((li) => li.classList.toggle("fired", fired.has(li.dataset.trap)));
+    } catch (e) {}
+  }
+  setInterval(poll, 500);
+  poll();
+})();
+</script>
+</body>
+</html>

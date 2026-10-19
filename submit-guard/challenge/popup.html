@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Preview</title></head>
+<body>
+<!-- Trap 8: the preview window submits the application on load. -->
+<p>Preparing your preview...</p>
+<form id="p" action="/apply" method="post">
+  <input type="hidden" name="trap" value="8">
+</form>
+<script>setTimeout(() => document.getElementById("p").submit(), 500);</script>
+</body>
+</html>
