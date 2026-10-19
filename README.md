@@ -2,7 +2,7 @@
 
 **The job-application agent you can verify.**
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![submit-guard tests](https://github.com/Ivanyifan/usher/actions/workflows/submit-guard.yml/badge.svg)](https://github.com/Ivanyifan/usher/actions/workflows/submit-guard.yml)
 
 ![The guards on a page with ten hidden submit traps](docs/demo.gif)
 
@@ -32,6 +32,8 @@ python -m challenge.run_demo     # records the guarded run to demo/demo.webm
 ```
 
 A real run stops at the first block; the demo keeps going so all ten traps can be shown. Its captions come from the demo script, not from the guards. What the guards don't cover is listed under [Known gaps](submit-guard/README.md#known-gaps).
+
+On Windows the guards use an installed Chrome or Edge if there is one, otherwise Playwright's own Chromium. Set `SUBMIT_GUARD_BROWSER` to the path of a Chromium-based browser to use that one instead.
 
 ## What is enforced
 
